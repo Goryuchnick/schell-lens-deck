@@ -1,174 +1,177 @@
+**English** | [Русский](README.ru.md)
+
 # design-game
 
-**design-game** is a multi-stage game design pipeline built on Jesse Schell's lenses ("The Art of Game Design"). It guides AI coding agents (Claude Code / Cursor / Antigravity) from a raw idea to release through Stages 0–7, keeping the controlling idea as the spine and checking consistency after every stage. Scale-agnostic: works for a 5-minute mini-game and an AAA concept alike.
+**design-game** is a multi-stage game design pipeline built on Jesse Schell's lenses ("The Art of Game Design: A Book of Lenses"). It guides AI coding agents (Claude Code / Cursor / Antigravity) from a raw idea to release through Stages 0–7, keeping the controlling idea as the spine and checking consistency after every stage. Scale-agnostic: works for a 5-minute mini-game and an AAA concept alike.
 
 ---
 
-# design-game — пайплайн гейм-дизайна по линзам Джесси Шелла для ИИ-кодинг-агентов (Claude Code / Cursor / Antigravity)
+## What it is
 
-Мульти-стадийный оркестратор, который ведёт **от идеи до релиза** по линзам Шелла («The Art of Game Design: A Book of Lenses»). Скилл — не «генерит диздок одной кнопкой»: он ведёт диалог по шагам, на каждом применяя релевантный набор линз, и собирает **растущий диздок (GDD)** + **живой журнал ответов на линзы (LENS-LOG)**.
-
-Архитектурно — оркестратор + субагенты-стадии + Markdown-артефакты. Масштаб-агностичен: работает и для AAA-концепта, и для миниигры на 5 минут.
-
----
-
-## Что это
-
-- **Оркестратор** (`skill/design-game/SKILL.md`) — entrypoint, ведёт бриф, диспатчит стадийных агентов, держит петли ревью.
-- **Субагенты** (`.claude/agents/gd-*.md`) — каждый отвечает за одну стадию; читают `CONTROLLING-IDEA.md` как стержень; возвращают `OK | BLOCK`.
-- **Библиотека линз** (`lenses/`) — ~100 линз с фокус-вопросами, стадийным маппингом и дисциплиной прото-зондов.
-- **Шаблоны** (`templates/`) — артефакты игры (GDD, LENS-LOG, CONTROLLING-IDEA, CONSISTENCY, PITCH, PROTOTYPE-PROBE, JSON-логи).
-- **Адаптеры** (`adapters/`) — инструкции по установке под Claude Code, Cursor, Antigravity.
+- **Orchestrator** (`skill/design-game/SKILL.md`) — entry point; runs the brief interview, dispatches stage agents, holds review loops.
+- **Sub-agents** (`.claude/agents/gd-*.md`) — each owns one stage; reads `CONTROLLING-IDEA.md` as the spine; returns `OK | BLOCK`.
+- **Lens library** (`lenses/`) — ~100 lenses with focus questions, stage mapping, and proto-probe discipline.
+- **Templates** (`templates/`) — game artefacts (GDD, LENS-LOG, CONTROLLING-IDEA, CONSISTENCY, PITCH, PROTOTYPE-PROBE, JSON logs).
+- **Adapters** (`adapters/`) — setup instructions for Claude Code, Cursor, and Antigravity.
 
 ---
 
-## Ключевые принципы
+## Key principles
 
-- **Управляющая идея — стержень.** Формулируется первой (Стадия 0), живёт в шапке каждого артефакта. Любой элемент, не усиливающий её, — кандидат на вырез (линза Unification).
-- **Живой журнал линз (LENS-LOG).** Ответы на фокус-вопросы накапливаются по ходу, могут долго висеть `open`. Это честнее, чем отвечать на всё сразу.
-- **Rule of the Loop — gd-keeper после каждой стадии.** «Правило петли» Шелла: после закрытия любой стадии `gd-keeper` переаудитирует все предыдущие на дрейф от управляющей идеи и внутренние противоречия → `CONSISTENCY.md`. Серьёзный дрейф → `BLOCK` → петля к пользователю.
-- **Engine-agnostic прото-зонды, одноразовые по дисциплине Шелла.** У каждого зонда ровно один рискованный вопрос; готов выбросить. Лестница форм: таблица-симуляция → бумага/ASCII → веб (TS + Phaser/Canvas). Веб берётся потому, что его Claude Code может собрать и запустить через Playwright прямо в чате — петля замыкается.
-- **Руль автономии** — три режима, выбираются на старте, переключаются в любой точке: `co-design` (агент предлагает, человек решает каждую развилку) / `assisted` (агент драфтит, человек аппрувит на гейтах) / `auto` (агент гонит, каждое самостоятельное решение в `decision-log`). Агент = спарринг-партнёр + писарь; **ставки делает дизайнер**.
-- **Подбор линз по двум осям — не по чистому scale.** Набор стадии = ядро стадии + `foundational`-кандидаты (Essential Experience, The Toy, Flow, Curiosity) + **pull по категориям и рискам игры** (теги: advergame, multiplayer, narrative, economy, kids, …). Scale влияет на глубину, но не обрезает релевантную линзу.
-- **Advergame-слой правдивости.** Для рекламных и обучающих игр: число-наружу = источник или пометка «иллюстративное». `gd-balance` не выдумывает обещания молча, `gd-keeper` ловит их как `DRIFT (Responsibility / Honest Claim)`.
-- **Лог-архитектура: рассуждение=.md, данные=JSON.** `GDD.md` / `LENS-LOG.md` / `CONSISTENCY.md` — аргумент для дизайнера. `probe.json` / `lens-log.json` / `errors.json` — замеры и статусы для машинных проверок. Не дубль — разделение по природе.
+- **Controlling idea is the spine.** Formulated first (Stage 0), lives in the header of every artefact. Any element that does not reinforce it is a cut candidate (Unification lens).
+- **Living lens log (LENS-LOG).** Answers to focus questions accumulate throughout; some may stay `open` for a long time. That is more honest than answering everything at once.
+- **Rule of the Loop — gd-keeper after every stage.** After closing any stage, `gd-keeper` re-audits all previous stages for drift from the controlling idea and internal contradictions → `CONSISTENCY.md`. Serious drift → `BLOCK` → loop back to the user.
+- **Engine-agnostic proto-probes, disposable by Schell's discipline.** Each probe has exactly one risky question; be ready to throw it away. Form ladder: simulation table → paper/ASCII → web (TS + Phaser/Canvas). Web is chosen because Claude Code can build and run it via Playwright right in the chat — closing the loop.
+- **Autonomy dial** — three modes, chosen at start, switchable at any point: `co-design` (agent proposes, human decides every fork) / `assisted` (agent drafts, human approves at gates) / `auto` (agent drives, every independent decision logged in `decision-log`). The agent is sparring partner and scribe; **the designer calls the shots**.
+- **Lens selection by two axes — not by scale alone.** Each stage's set = stage core + `foundational` candidates (Essential Experience, The Toy, Flow, Curiosity) + **pull by game categories and risks** (tags: advergame, multiplayer, narrative, economy, kids, …). Scale affects depth, but does not cut a relevant lens.
+- **Advergame honesty layer.** For promotional and educational games: any number shown publicly must have a source or be marked "illustrative". `gd-balance` does not silently invent claims; `gd-keeper` catches them as `DRIFT (Responsibility / Honest Claim)`.
+- **Log architecture: reasoning = .md, data = JSON.** `GDD.md` / `LENS-LOG.md` / `CONSISTENCY.md` are the argument for the designer. `probe.json` / `lens-log.json` / `errors.json` are measurements and statuses for machine checks. Not duplicates — separated by nature.
 
 ---
 
-## Стадии 0–7
+## Stages 0–7
 
-| # | Стадия | Цель / артефакт | Ключевые линзы | Агент |
+| # | Stage | Goal / artefact | Key lenses | Agent |
 |---|---|---|---|---|
-| **0** | Сердце опыта | Управляющая идея в 1 предложение + желаемый опыт + для кого + scale → `CONTROLLING-IDEA.md` | Essential Experience, Emotion, The Player, Fun, Curiosity, Surprise | оркестратор (интервью) |
-| **1** | Концепт | Тетрада (Механика / История / Эстетика / Технология), портрет игрока, тема → раздел GDD + one-pager | Holographic Design, Unification, Resonance, Elemental Tetrad, Flow, Motivation | **gd-concept** |
-| **2** | Ядро и механики | Core loop; пространство/объекты/действия/правила; цели; значимые выборы → раздел GDD (+ зонд) | The Toy, Mechanics, Goals, Meaningful Choices, Triangularity, Skill, Chance | **gd-mechanics** (+ gd-prototyper / gd-builder) |
-| **3** | Баланс | 12 типов баланса, экономика, кривые сложности → раздел GDD (+ таблица-симуляция) | Fairness, Challenge, Reward, Simplicity/Complexity, Elegance, Economy, Honest Claim | **gd-balance** (+ gd-prototyper / gd-builder) |
-| **4** | Опыт и интерфейс | Кривая интереса, эстетика, интерфейс, фидбэк, «сочность», непрямое управление → раздел GDD | Interest Curve, Beauty, The Interface, Feedback, Juiciness, Indirect Control | **gd-experience** |
-| **5** | Нарратив и мир *(skippable для mini)* | История, мир, аватар, персонажи, story-machine → раздел GDD | The Story, The World, The Avatar, Character, Story Machine, The Obstacle | **gd-narrative** |
-| **6** | Плейтест и итерации | План тестов, петля итераций, карта рисков → секция PLAYTEST (+ играбельный билд) | The Playtest, The Loop, The Team | **gd-playtest** (+ gd-prototyper / gd-builder) |
-| **7** | Релиз и бизнес | Питч, комьюнити, монетизация, ответственность, тех/деплой-план → `PITCH.md` + раздел GDD | The Pitch, The Profit, Transformation, Responsibility, Community | **gd-release** |
+| **0** | Heart of the experience | Controlling idea in 1 sentence + desired experience + for whom + scale → `CONTROLLING-IDEA.md` | Essential Experience, Emotion, The Player, Fun, Curiosity, Surprise | orchestrator (interview) |
+| **1** | Concept | Elemental Tetrad (Mechanics / Story / Aesthetics / Technology), player portrait, theme → GDD section + one-pager | Holographic Design, Unification, Resonance, Elemental Tetrad, Flow, Motivation | **gd-concept** |
+| **2** | Core & mechanics | Core loop; space/objects/actions/rules; goals; meaningful choices → GDD section (+ probe) | The Toy, Mechanics, Goals, Meaningful Choices, Triangularity, Skill, Chance | **gd-mechanics** (+ gd-prototyper / gd-builder) |
+| **3** | Balance | 12 balance types, economy, difficulty curves → GDD section (+ simulation table) | Fairness, Challenge, Reward, Simplicity/Complexity, Elegance, Economy, Honest Claim | **gd-balance** (+ gd-prototyper / gd-builder) |
+| **4** | Experience & interface | Interest curve, aesthetics, interface, feedback, "juiciness", indirect control → GDD section | Interest Curve, Beauty, The Interface, Feedback, Juiciness, Indirect Control | **gd-experience** |
+| **5** | Narrative & world *(skippable for mini)* | Story, world, avatar, characters, story-machine → GDD section | The Story, The World, The Avatar, Character, Story Machine, The Obstacle | **gd-narrative** |
+| **6** | Playtesting & iteration | Test plan, iteration loop, risk map → PLAYTEST section (+ playable build) | The Playtest, The Loop, The Team | **gd-playtest** (+ gd-prototyper / gd-builder) |
+| **7** | Release & business | Pitch, community, monetisation, responsibility, tech/deploy plan → `PITCH.md` + GDD section | The Pitch, The Profit, Transformation, Responsibility, Community | **gd-release** |
 
-После каждой стадии — **gd-keeper** (обратная сверка всех предыдущих стадий). Стадия 5 skippable для масштаба `mini`/`small` без нарратива. Стадия 7 обязательна для `advergame/serious`.
+After every stage — **gd-keeper** (back-audit of all previous stages). Stage 5 is skippable for scale `mini`/`small` without narrative. Stage 7 is mandatory for `advergame/serious`.
 
 ---
 
-## Установка
+## Installation
 
-Полные инструкции с нюансами каждого тула — в `adapters/`:
+Full instructions with tool-specific notes are in `adapters/`:
 
-| Тул | Адаптер |
+| Tool | Adapter |
 |---|---|
 | Claude Code | [`adapters/claude-code.md`](adapters/claude-code.md) |
 | Cursor 2.4+ | [`adapters/cursor.md`](adapters/cursor.md) |
 | Antigravity 2.0 | [`adapters/antigravity.md`](adapters/antigravity.md) |
 
-### Быстрая установка под Claude Code
+### Quick install for Claude Code
 
-1. Клонируй репозиторий рядом с твоим проектом (или прямо в workspace-корень):
-   ```
-   git clone <repo-url> gamedesign
-   ```
-2. Скопируй скилл в глобальный `.claude/skills/`:
-   ```
-   cp -r gamedesign/skill/design-game ~/.claude/skills/design-game
-   # или в .claude/skills/ проекта
-   ```
-   > **Примечание:** `skill/design-game/SKILL.md` — копия для самодостаточности клона. Канонический рабочий скилл Claude Code ожидается в `.claude/skills/design-game/SKILL.md` (глобальный или проектный конфиг) — туда его и копируй при установке.
-3. Субагенты уже лежат в `gamedesign/.claude/agents/gd-*.md` — оркестратор их находит сам. Опционально — скопировать в глобальный `~/.claude/agents/` для доступа из любого проекта.
-4. Проверь/скорректируй модели в [`lenses/models.md`](lenses/models.md):
-   - `reasoning-heavy` → `opus`: `gd-keeper`, `gd-concept`, `gd-balance`;
-   - `balanced-creative` → `sonnet`: остальные агенты;
-   - `mechanical` → `haiku`: механические шаги.
-5. Для **веб-зондов** (стадия с вопросом про ощущение/тайминг) нужен Playwright MCP — добавь в `.mcp.json` проекта, если не подключён. Бескодовые зонды (таблица/ASCII) Playwright не требуют.
+> **Important:** The local folder name must be `gamedesign` — the skill's internal paths (`gamedesign/lenses/...`, `gamedesign/.claude/agents/...`) resolve relative to the workspace root and rely on this exact name. The GitHub repo name (`schell-lens-deck`) and the local folder name (`gamedesign`) differ intentionally — clone with an explicit folder name as shown below.
+
+```bash
+# 1. Clone INTO a folder named gamedesign (the name matters — the skill references it):
+git clone https://github.com/Goryuchnick/schell-lens-deck.git gamedesign
+
+# 2. Install the skill orchestrator into .claude/skills/ (global or project-level):
+cp -r gamedesign/skill/design-game ~/.claude/skills/design-game
+#    (or into your project's .claude/skills/)
+
+# 3. Sub-agents are already at gamedesign/.claude/agents/ — the orchestrator finds them automatically.
+#    Optionally copy to ~/.claude/agents/ for global access from any project.
+
+# 4. Review / adjust models in gamedesign/lenses/models.md:
+#    - reasoning-heavy → opus:   gd-keeper, gd-concept, gd-balance
+#    - balanced-creative → sonnet: all other agents
+#    - mechanical → haiku: mechanical steps
+
+# 5. For web probes (stage with feel/timing questions) you need Playwright MCP —
+#    add it to your project's .mcp.json if not already connected.
+#    Code-free probes (simulation table / ASCII) do not require Playwright.
+```
+
+> **Note:** `skill/design-game/SKILL.md` in the repo is a copy kept for standalone cloning. The canonical working skill for Claude Code is expected at `.claude/skills/design-game/SKILL.md` (global or project config) — copy it there during installation.
 
 ### Cursor 2.4+
 
-Cursor читает `.claude/agents/` (`.cursor/agents/` приоритетнее). Субагенты переносятся почти без изменений — только замени словарь `model` по `lenses/models.md` (opus → `claude-opus-4.x`, sonnet → `inherit`, haiku → `fast`). Подробнее → [`adapters/cursor.md`](adapters/cursor.md).
+Cursor 2.4+ reads `.claude/agents/` (`.cursor/agents/` takes priority on name collisions), so the sub-agents transfer almost unchanged — only replace the `model` field values per [`lenses/models.md`](lenses/models.md) (`opus` → `claude-opus-4.x`, `sonnet` → `inherit`, `haiku` → `fast`). Details → [`adapters/cursor.md`](adapters/cursor.md).
 
 ### Antigravity 2.0
 
-Транскрипция, не drop-in: инвариант → `GEMINI.md`, роли → `.agents/agents.md`, скилл → `.agents/skills.md`. Модели по тирам из `lenses/models.md`. Подробнее → [`adapters/antigravity.md`](adapters/antigravity.md).
+Transcription, not a drop-in: invariant → `GEMINI.md`, roles → `.agents/agents.md`, skill → `.agents/skills.md`. Models by tier from [`lenses/models.md`](lenses/models.md). Details → [`adapters/antigravity.md`](adapters/antigravity.md).
 
 ---
 
-## Быстрый старт
+## Quick start
 
-1. Вызови `/design-game` (или напиши «спроектируем игру по Шеллу»).
-2. Оркестратор задаст вопросы брифа (по одному):
-   - идея в одном предложении;
-   - масштаб (`mini` / `small` / `medium` / `large`);
-   - режим (`docs-only` или `docs + прото-зонды`);
-   - тип игры (`entertainment` или `advergame/serious`);
-   - режим автономии (`co-design` / `assisted` / `auto`);
-   - куда класть артефакты (`<game-path>`).
-3. Пройди стадии 0–7 — каждая заканчивается гейтом с резюме и возможностью направить курс.
-4. На выходе: собранный `GDD.md` + `PITCH.md` + `LENS-LOG.md` + (опц.) `prototypes/`.
+1. Invoke `/design-game` (or say "let's design a game by Schell's lenses").
+2. The orchestrator asks brief questions one by one:
+   - idea in one sentence;
+   - scale (`mini` / `small` / `medium` / `large`);
+   - mode (`docs-only` or `docs + proto-probes`);
+   - game type (`entertainment` or `advergame/serious`);
+   - autonomy mode (`co-design` / `assisted` / `auto`);
+   - where to put artefacts (`<game-path>`).
+3. Walk through Stages 0–7 — each ends with a gate: a summary and a chance to steer.
+4. Output: assembled `GDD.md` + `PITCH.md` + `LENS-LOG.md` + (optionally) `prototypes/`.
 
 ---
 
-## Структура репозитория
+## Repository structure
 
 ```
 gamedesign/
-  README.md                      ← этот файл
+  README.md                      ← this file
+  README.ru.md                   ← Russian version
   LICENSE                        ← MIT
   .gitignore
-  CLAUDE.md                      ← правила проекта для Claude Code
+  CLAUDE.md                      ← project rules for Claude Code
 
   lenses/
-    lenses.md                    ← библиотека ~100 линз (имя RU/EN + фокус-вопросы + теги)
-    stage-map.md                 ← стадия → линзы + scale-правила + risk-gate
-    schell-prototyping.md        ← дисциплина прото-зонда (лестница форм, правила)
-    models.md                    ← тир модели → конкретная модель по тулу
-    lens-index.json              ← машинный индекс линз (diagnoses, categories, tier)
+    lenses.md                    ← library of ~100 lenses (RU/EN name + focus questions + tags)
+    stage-map.md                 ← stage → lenses + scale rules + risk-gate
+    schell-prototyping.md        ← proto-probe discipline (form ladder, rules)
+    models.md                    ← model tier → concrete model per tool
+    lens-index.json              ← machine index of lenses (diagnoses, categories, tier)
 
   templates/
-    CONTROLLING-IDEA.md          ← шаблон стержня
-    LENS-LOG.md                  ← шаблон живого журнала линз
-    GDD.md                       ← шаблон мастер-диздока
-    CONSISTENCY.md               ← шаблон аудитов gd-keeper
-    PITCH.md                     ← шаблон питча
-    PROTOTYPE-PROBE.md           ← шаблон истории зонда
-    probe.json                   ← шаблон JSON-лога зонда
-    lens-log.json                ← шаблон тонкого индекса линз
-    errors.json                  ← шаблон лога граблей проекта
+    CONTROLLING-IDEA.md          ← spine template
+    LENS-LOG.md                  ← living lens log template
+    GDD.md                       ← master game design document template
+    CONSISTENCY.md               ← gd-keeper audit template
+    PITCH.md                     ← pitch template
+    PROTOTYPE-PROBE.md           ← probe story template
+    probe.json                   ← probe JSON log template
+    lens-log.json                ← thin lens index template
+    errors.json                  ← project pitfalls log template
 
   adapters/
-    claude-code.md               ← установка под Claude Code
-    cursor.md                    ← установка под Cursor 2.4+
-    antigravity.md               ← установка под Antigravity 2.0
+    claude-code.md               ← setup for Claude Code
+    cursor.md                    ← setup for Cursor 2.4+
+    antigravity.md               ← setup for Antigravity 2.0
 
   docs/
-    SPEC.md                      ← спецификация скилла (источник истины)
-    LESSONS.md                   ← maintainer-лог: дыры системы, исправленные поведения
+    SPEC.md                      ← skill specification (source of truth)
+    LESSONS.md                   ← maintainer log: system gaps and fixed behaviours
 
   .claude/agents/
-    gd-keeper.md                 ← хранитель управляющей идеи + кросс-стадийный аудит
-    gd-concept.md                ← огранка идеи + тетрада + one-pager
-    gd-mechanics.md              ← core loop + механики + выборы
-    gd-balance.md                ← баланс + экономика + кривые сложности
-    gd-experience.md             ← кривая интереса + интерфейс + «сочность»
-    gd-narrative.md              ← история + мир + персонажи
-    gd-playtest.md               ← план тестов + петля итераций
-    gd-release.md                ← питч + монетизация + ответственность + деплой
-    gd-prototyper.md             ← дизайн одноразового зонда (reasoning)
-    gd-builder.md                ← код зонда + Playwright + probe.json
+    gd-keeper.md                 ← controlling-idea guardian + cross-stage audit
+    gd-concept.md                ← idea refinement + tetrad + one-pager
+    gd-mechanics.md              ← core loop + mechanics + choices
+    gd-balance.md                ← balance + economy + difficulty curves
+    gd-experience.md             ← interest curve + interface + juiciness
+    gd-narrative.md              ← story + world + characters
+    gd-playtest.md               ← test plan + iteration loop
+    gd-release.md                ← pitch + monetisation + responsibility + deploy
+    gd-prototyper.md             ← disposable probe design (reasoning)
+    gd-builder.md                ← probe code + Playwright + probe.json
 
   skill/
     design-game/
-      SKILL.md                   ← копия оркестратора для самодостаточности клона
+      SKILL.md                   ← orchestrator copy for standalone cloning
 ```
 
-> Артефакты конкретных игр (`games/<slug>/`) в публикацию не входят — они остаются локально у дизайнера. Runtime-логи (`errors.json`, `probe.json`, `lens-log.json` в папках игр) тоже исключены из git.
+> Individual game artefacts (`games/<slug>/`) are not published — they stay local with the designer. Runtime logs (`errors.json`, `probe.json`, `lens-log.json` inside game folders) are excluded from git as well.
 
 ---
 
-## Атрибуция
+## Attribution
 
-Основано на методологии Jesse Schell, *The Art of Game Design: A Book of Lenses* (3rd ed.). Фокус-вопросы линз в `lenses/lenses.md` — парафраз, не дословный текст карт колоды. Если хочешь работать с оригинальными карточками — рекомендуем купить колоду у автора.
+Based on the methodology of Jesse Schell, *The Art of Game Design: A Book of Lenses* (3rd ed.). The focus questions for lenses in `lenses/lenses.md` are a paraphrase, not verbatim text from the card deck. If you want to work with the original cards, we recommend buying the deck from the author.
 
 ---
 
-## Лицензия
+## License
 
 [MIT](LICENSE) — Copyright (c) 2026 Alexander Pronin.
