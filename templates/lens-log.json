@@ -1,0 +1,30 @@
+{
+  "_comment": "ТОНКИЙ ИНДЕКС — без прозы, только статусы. Полные ответы на линзы живут в LENS-LOG.md. Этот файл ведёт ОРКЕСТРАТОР (не стадийные агенты). gd-keeper читает его перед финалом: ловит линзы в статусе 'open' на закрытых стадиях и блокирует объявление игры готовой.",
+
+  "lenses": [
+    {
+      "lens": "Essential Experience",
+      "stage": 0,
+      "status": "closed",
+      "link": "LENS-LOG.md#essential-experience"
+    },
+    {
+      "lens": "Challenge",
+      "stage": 3,
+      "status": "open",
+      "link": "LENS-LOG.md#challenge"
+    },
+    {
+      "lens": "Honest Claim",
+      "stage": 3,
+      "status": "open",
+      "link": "LENS-LOG.md#honest-claim"
+    },
+    {
+      "lens": "The Toy",
+      "stage": 2,
+      "status": "closed",
+      "link": "LENS-LOG.md#the-toy"
+    }
+  ]
+}
