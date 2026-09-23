@@ -20,6 +20,8 @@ Core помечает роль **тиром** (`reasoning-heavy | balanced-creat
 
 Значение из соответствующей колонки идёт **дословно** в поле `model:` YAML-фронтматтера субагента.
 
+> Колонка Claude Code — алиасы, они сами указывают на текущие модели (сейчас `opus` — Opus 5.5, `sonnet` — Sonnet 5). Колонки Cursor и Antigravity записаны на момент создания набора: при переносе сверить с актуальными моделями инструмента.
+
 | Тир | Claude Code | Cursor | Antigravity |
 |---|---|---|---|
 | **reasoning-heavy** | `opus` | `claude-opus-4.x` | `Gemini 3 Pro` (альт. `Claude Opus 4.6`) |
