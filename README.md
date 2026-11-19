@@ -27,7 +27,7 @@ claude plugin marketplace add Goryuchnick/schell-lens-deck
 claude plugin install design-game@schell-lens-deck
 ```
 
-Внутри сессии то же самое делают `/plugin marketplace add Goryuchnick/schell-lens-deck` и `/plugin install design-game@schell-lens-deck`.
+Внутри сессии то же самое делают `/plugin marketplace add Goryuchnick/schell-lens-deck` и `/plugin install design-game@schell-lens-deck`. Если у тебя нет SSH-ключа на GitHub и клон не проходит, добавь маркетплейс по полному адресу: `claude plugin marketplace add https://github.com/Goryuchnick/schell-lens-deck.git`.
 
 **Codex** — склонировать репозиторий и запустить установщик:
 
@@ -51,7 +51,7 @@ Claude Code:
 
 ```text
 Установи скилл design-game: выполни в терминале
-claude plugin marketplace add Goryuchnick/schell-lens-deck
+claude plugin marketplace add https://github.com/Goryuchnick/schell-lens-deck.git
 claude plugin install design-game@schell-lens-deck
 и скажи мне перезапустить сессию.
 ```

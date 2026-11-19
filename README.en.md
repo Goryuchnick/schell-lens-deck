@@ -29,7 +29,7 @@ claude plugin marketplace add Goryuchnick/schell-lens-deck
 claude plugin install design-game@schell-lens-deck
 ```
 
-Inside a session the same is done with `/plugin marketplace add Goryuchnick/schell-lens-deck` and `/plugin install design-game@schell-lens-deck`.
+Inside a session the same is done with `/plugin marketplace add Goryuchnick/schell-lens-deck` and `/plugin install design-game@schell-lens-deck`. If you have no SSH key on GitHub and the clone fails, add the marketplace by its full address: `claude plugin marketplace add https://github.com/Goryuchnick/schell-lens-deck.git`.
 
 **Codex** — clone and run the installer:
 
@@ -53,7 +53,7 @@ Claude Code:
 
 ```text
 Install the design-game skill: run in the terminal
-claude plugin marketplace add Goryuchnick/schell-lens-deck
+claude plugin marketplace add https://github.com/Goryuchnick/schell-lens-deck.git
 claude plugin install design-game@schell-lens-deck
 then tell me to restart the session.
 ```
