@@ -1,22 +1,15 @@
-# Secrets / environment
+# Секреты и окружение
 .env
 .env.*
 *.local
 
-# Runtime tooling
-.playwright-mcp/
+# Python и инструменты
+__pycache__/
+*.pyc
+.venv/
 node_modules/
+.playwright-mcp/
 .DS_Store
 
-# Per-project runtime logs (each game keeps its own; not for publication)
-# templates/errors.json is intentionally preserved — only game-specific logs are excluded
-games/**/errors.json
-games/**/probe.json
-games/**/lens-log.json
-
-# Prototype builds (disposable, not products)
-games/**/prototypes/**/dist/
-games/**/prototypes/**/node_modules/
-
-# Internal working fragments
-**/_parts/
+# Папки игр — у пользователя, в репозиторий скилла не входят
+design/

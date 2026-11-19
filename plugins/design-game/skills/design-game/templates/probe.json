@@ -1,0 +1,50 @@
+{
+  "about": "Шаблон. Одна запись — один зонд — один вопрос. Реальный файл пишет gd-builder после прогона в <NN-стадия>/probes/probe-NN-<slug>/probe.json; поле about в реальном файле убрать. Значения ниже — выдуманный пример.",
+
+  "id": "probe-02",
+  "stage": 3,
+  "risk": "R-03",
+  "question": "Хватает ли трёх жизней, чтобы средний забег доходил до пятой волны?",
+  "form": "table",
+  "runtime": {
+    "kind": "none",
+    "name": "",
+    "tool": ""
+  },
+
+  "constants": {
+    "lives": 3,
+    "spawn_interval_ms": 2000,
+    "ramp_per_wave": 0.15,
+    "max_wave": 10
+  },
+
+  "prediction": {
+    "text": "Средний забег доходит до шестой волны",
+    "confidence": "средняя",
+    "knowledge": "гипотеза"
+  },
+
+  "measurements": {
+    "runs": 200,
+    "wave_reached_mean": 4.6,
+    "wave_reached_p10": 3,
+    "share_died_before_wave_3": 0.12,
+    "response_ms_max": null,
+    "trajectory_sample": [3, 4, 4, 5, 7, 4]
+  },
+
+  "verdict": "ambiguous",
+  "verdictNote": "Среднее ниже прогноза, но разброс большой: пять волн достигают две трети забегов. Нужен ещё один круг с ramp_per_wave 0.10.",
+
+  "disposable": true,
+
+  "links": {
+    "probe_md": "PROTOTYPE-PROBE.md",
+    "build": "",
+    "risk": "logs/RISKS.md#R-03",
+    "stage_file": "03-balance/BALANCE.md"
+  },
+
+  "ts": "2026-01-15T10:15:00Z"
+}

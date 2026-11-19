@@ -1,177 +1,108 @@
-**English** | [Русский](README.ru.md)
+**Русский** | [English](README.en.md)
 
-# design-game
+# design-game — гейм-дизайн по линзам Джесси Шелла
 
-**design-game** is a multi-stage game design pipeline built on Jesse Schell's lenses ("The Art of Game Design: A Book of Lenses"). It guides AI coding agents (Claude Code / Cursor / Antigravity) from a raw idea to release through Stages 0–7, keeping the controlling idea as the spine and checking consistency after every stage. Scale-agnostic: works for a 5-minute mini-game and an AAA concept alike.
+Скилл для Claude Code и OpenAI Codex, который ведёт игру от сырой идеи до готового диздока по стадиям 0–7 метода Джесси Шелла («The Art of Game Design: A Book of Lenses»). Подходит и для игры на пять минут, и для большого проекта.
 
----
+Агент здесь — спарринг-партнёр, писарь и аудитор, а решения принимает человек. Чтобы модель не своевольничала, шаги, где можно ошибиться, сделаны скриптами: они подбирают линзы на стадию, проверяют файл стадии перед гейтом, собирают ответы владельца, печатают карточку гейта и собирают Библию проекта.
 
-## What it is
+## Что внутри
 
-- **Orchestrator** (`skill/design-game/SKILL.md`) — entry point; runs the brief interview, dispatches stage agents, holds review loops.
-- **Sub-agents** (`.claude/agents/gd-*.md`) — each owns one stage; reads `CONTROLLING-IDEA.md` as the spine; returns `OK | BLOCK`.
-- **Lens library** (`lenses/`) — ~100 lenses with focus questions, stage mapping, and proto-probe discipline.
-- **Templates** (`templates/`) — game artefacts (GDD, LENS-LOG, CONTROLLING-IDEA, CONSISTENCY, PITCH, PROTOTYPE-PROBE, JSON logs).
-- **Adapters** (`adapters/`) — setup instructions for Claude Code, Cursor, and Antigravity.
+- **Колода линз** — 113 линз книги своими словами, линза 93½ «Присутствие» из третьего издания и две наши с пометкой «не Шелл»: «Правдивость» для рекламных и обучающих игр и «Безопасность детей в общении».
+- **Стадии 0–7**: сердце опыта → концепт и тетрада → механики → баланс → опыт и интерфейс → нарратив и мир → плейтест → релиз. У каждой стадии свои шаги, шаблон и роль-агент.
+- **Хранитель связности** после каждой стадии пересматривает всю игру: держится ли она за управляющую идею, проходит ли восемь фильтров, нет ли противоречий между стадиями.
+- **Гейт аудитории**: прежде чем агент-игрок пройдёт зонд, человек описывает, кто будет играть. Интервью с игроками строится под каждую аудиторию.
+- **Зонды** — одноразовые пробы под один рискованный вопрос: таблица, бумага, веб-зонд, который собирается прямо в сессии, или движок через MCP.
 
----
+На выходе — папка игры: файлы стадий, журналы решений, рисков и линз и `BIBLE.md` — один документ, который можно отдать человеку со стороны.
 
-## Key principles
+## Установка
 
-- **Controlling idea is the spine.** Formulated first (Stage 0), lives in the header of every artefact. Any element that does not reinforce it is a cut candidate (Unification lens).
-- **Living lens log (LENS-LOG).** Answers to focus questions accumulate throughout; some may stay `open` for a long time. That is more honest than answering everything at once.
-- **Rule of the Loop — gd-keeper after every stage.** After closing any stage, `gd-keeper` re-audits all previous stages for drift from the controlling idea and internal contradictions → `CONSISTENCY.md`. Serious drift → `BLOCK` → loop back to the user.
-- **Engine-agnostic proto-probes, disposable by Schell's discipline.** Each probe has exactly one risky question; be ready to throw it away. Form ladder: simulation table → paper/ASCII → web (TS + Phaser/Canvas). Web is chosen because Claude Code can build and run it via Playwright right in the chat — closing the loop.
-- **Autonomy dial** — three modes, chosen at start, switchable at any point: `co-design` (agent proposes, human decides every fork) / `assisted` (agent drafts, human approves at gates) / `auto` (agent drives, every independent decision logged in `decision-log`). The agent is sparring partner and scribe; **the designer calls the shots**.
-- **Lens selection by two axes — not by scale alone.** Each stage's set = stage core + `foundational` candidates (Essential Experience, The Toy, Flow, Curiosity) + **pull by game categories and risks** (tags: advergame, multiplayer, narrative, economy, kids, …). Scale affects depth, but does not cut a relevant lens.
-- **Advergame honesty layer.** For promotional and educational games: any number shown publicly must have a source or be marked "illustrative". `gd-balance` does not silently invent claims; `gd-keeper` catches them as `DRIFT (Responsibility / Honest Claim)`.
-- **Log architecture: reasoning = .md, data = JSON.** `GDD.md` / `LENS-LOG.md` / `CONSISTENCY.md` are the argument for the designer. `probe.json` / `lens-log.json` / `errors.json` are measurements and statuses for machine checks. Not duplicates — separated by nature.
+Нужны Python 3.9 или новее и git.
 
----
-
-## Stages 0–7
-
-| # | Stage | Goal / artefact | Key lenses | Agent |
-|---|---|---|---|---|
-| **0** | Heart of the experience | Controlling idea in 1 sentence + desired experience + for whom + scale → `CONTROLLING-IDEA.md` | Essential Experience, Emotion, The Player, Fun, Curiosity, Surprise | orchestrator (interview) |
-| **1** | Concept | Elemental Tetrad (Mechanics / Story / Aesthetics / Technology), player portrait, theme → GDD section + one-pager | Holographic Design, Unification, Resonance, Elemental Tetrad, Flow, Motivation | **gd-concept** |
-| **2** | Core & mechanics | Core loop; space/objects/actions/rules; goals; meaningful choices → GDD section (+ probe) | The Toy, Mechanics, Goals, Meaningful Choices, Triangularity, Skill, Chance | **gd-mechanics** (+ gd-prototyper / gd-builder) |
-| **3** | Balance | 12 balance types, economy, difficulty curves → GDD section (+ simulation table) | Fairness, Challenge, Reward, Simplicity/Complexity, Elegance, Economy, Honest Claim | **gd-balance** (+ gd-prototyper / gd-builder) |
-| **4** | Experience & interface | Interest curve, aesthetics, interface, feedback, "juiciness", indirect control → GDD section | Interest Curve, Beauty, The Interface, Feedback, Juiciness, Indirect Control | **gd-experience** |
-| **5** | Narrative & world *(skippable for mini)* | Story, world, avatar, characters, story-machine → GDD section | The Story, The World, The Avatar, Character, Story Machine, The Obstacle | **gd-narrative** |
-| **6** | Playtesting & iteration | Test plan, iteration loop, risk map → PLAYTEST section (+ playable build) | The Playtest, The Loop, The Team | **gd-playtest** (+ gd-prototyper / gd-builder) |
-| **7** | Release & business | Pitch, community, monetisation, responsibility, tech/deploy plan → `PITCH.md` + GDD section | The Pitch, The Profit, Transformation, Responsibility, Community | **gd-release** |
-
-After every stage — **gd-keeper** (back-audit of all previous stages). Stage 5 is skippable for scale `mini`/`small` without narrative. Stage 7 is mandatory for `advergame/serious`.
-
----
-
-## Installation
-
-Full instructions with tool-specific notes are in `adapters/`:
-
-| Tool | Adapter |
-|---|---|
-| Claude Code | [`adapters/claude-code.md`](adapters/claude-code.md) |
-| Cursor 2.4+ | [`adapters/cursor.md`](adapters/cursor.md) |
-| Antigravity 2.0 | [`adapters/antigravity.md`](adapters/antigravity.md) |
-
-### Quick install for Claude Code
-
-> **Important:** The local folder name must be `gamedesign` — the skill's internal paths (`gamedesign/lenses/...`, `gamedesign/.claude/agents/...`) resolve relative to the workspace root and rely on this exact name. The GitHub repo name (`schell-lens-deck`) and the local folder name (`gamedesign`) differ intentionally — clone with an explicit folder name as shown below.
+**Claude Code** — плагином, две команды:
 
 ```bash
-# 1. Clone INTO a folder named gamedesign (the name matters — the skill references it):
-git clone https://github.com/Goryuchnick/schell-lens-deck.git gamedesign
-
-# 2. Install the skill orchestrator into .claude/skills/ (global or project-level):
-cp -r gamedesign/skill/design-game ~/.claude/skills/design-game
-#    (or into your project's .claude/skills/)
-
-# 3. Sub-agents are already at gamedesign/.claude/agents/ — the orchestrator finds them automatically.
-#    Optionally copy to ~/.claude/agents/ for global access from any project.
-
-# 4. Review / adjust models in gamedesign/lenses/models.md:
-#    - reasoning-heavy → opus:   gd-keeper, gd-concept, gd-balance
-#    - balanced-creative → sonnet: all other agents
-#    - mechanical → haiku: mechanical steps
-
-# 5. For web probes (stage with feel/timing questions) you need Playwright MCP —
-#    add it to your project's .mcp.json if not already connected.
-#    Code-free probes (simulation table / ASCII) do not require Playwright.
+claude plugin marketplace add Goryuchnick/schell-lens-deck
+claude plugin install design-game@schell-lens-deck
 ```
 
-> **Note:** `skill/design-game/SKILL.md` in the repo is a copy kept for standalone cloning. The canonical working skill for Claude Code is expected at `.claude/skills/design-game/SKILL.md` (global or project config) — copy it there during installation.
+Внутри сессии то же самое делают `/plugin marketplace add Goryuchnick/schell-lens-deck` и `/plugin install design-game@schell-lens-deck`.
 
-### Cursor 2.4+
+**Codex** — склонировать репозиторий и запустить установщик:
 
-Cursor 2.4+ reads `.claude/agents/` (`.cursor/agents/` takes priority on name collisions), so the sub-agents transfer almost unchanged — only replace the `model` field values per [`lenses/models.md`](lenses/models.md) (`opus` → `claude-opus-4.x`, `sonnet` → `inherit`, `haiku` → `fast`). Details → [`adapters/cursor.md`](adapters/cursor.md).
-
-### Antigravity 2.0
-
-Transcription, not a drop-in: invariant → `GEMINI.md`, roles → `.agents/agents.md`, skill → `.agents/skills.md`. Models by tier from [`lenses/models.md`](lenses/models.md). Details → [`adapters/antigravity.md`](adapters/antigravity.md).
-
----
-
-## Quick start
-
-1. Invoke `/design-game` (or say "let's design a game by Schell's lenses").
-2. The orchestrator asks brief questions one by one:
-   - idea in one sentence;
-   - scale (`mini` / `small` / `medium` / `large`);
-   - mode (`docs-only` or `docs + proto-probes`);
-   - game type (`entertainment` or `advergame/serious`);
-   - autonomy mode (`co-design` / `assisted` / `auto`);
-   - where to put artefacts (`<game-path>`).
-3. Walk through Stages 0–7 — each ends with a gate: a summary and a chance to steer.
-4. Output: assembled `GDD.md` + `PITCH.md` + `LENS-LOG.md` + (optionally) `prototypes/`.
-
----
-
-## Repository structure
-
-```
-gamedesign/
-  README.md                      ← this file
-  README.ru.md                   ← Russian version
-  LICENSE                        ← MIT
-  .gitignore
-  CLAUDE.md                      ← project rules for Claude Code
-
-  lenses/
-    lenses.md                    ← library of ~100 lenses (RU/EN name + focus questions + tags)
-    stage-map.md                 ← stage → lenses + scale rules + risk-gate
-    schell-prototyping.md        ← proto-probe discipline (form ladder, rules)
-    models.md                    ← model tier → concrete model per tool
-    lens-index.json              ← machine index of lenses (diagnoses, categories, tier)
-
-  templates/
-    CONTROLLING-IDEA.md          ← spine template
-    LENS-LOG.md                  ← living lens log template
-    GDD.md                       ← master game design document template
-    CONSISTENCY.md               ← gd-keeper audit template
-    PITCH.md                     ← pitch template
-    PROTOTYPE-PROBE.md           ← probe story template
-    probe.json                   ← probe JSON log template
-    lens-log.json                ← thin lens index template
-    errors.json                  ← project pitfalls log template
-
-  adapters/
-    claude-code.md               ← setup for Claude Code
-    cursor.md                    ← setup for Cursor 2.4+
-    antigravity.md               ← setup for Antigravity 2.0
-
-  docs/
-    SPEC.md                      ← skill specification (source of truth)
-    LESSONS.md                   ← maintainer log: system gaps and fixed behaviours
-
-  .claude/agents/
-    gd-keeper.md                 ← controlling-idea guardian + cross-stage audit
-    gd-concept.md                ← idea refinement + tetrad + one-pager
-    gd-mechanics.md              ← core loop + mechanics + choices
-    gd-balance.md                ← balance + economy + difficulty curves
-    gd-experience.md             ← interest curve + interface + juiciness
-    gd-narrative.md              ← story + world + characters
-    gd-playtest.md               ← test plan + iteration loop
-    gd-release.md                ← pitch + monetisation + responsibility + deploy
-    gd-prototyper.md             ← disposable probe design (reasoning)
-    gd-builder.md                ← probe code + Playwright + probe.json
-
-  skill/
-    design-game/
-      SKILL.md                   ← orchestrator copy for standalone cloning
+```bash
+git clone https://github.com/Goryuchnick/schell-lens-deck.git
+cd schell-lens-deck
+python install.py --codex
 ```
 
-> Individual game artefacts (`games/<slug>/`) are not published — they stay local with the designer. Runtime logs (`errors.json`, `probe.json`, `lens-log.json` inside game folders) are excluded from git as well.
+На Windows — `py install.py --codex`. Установщик кладёт скилл в `~/.agents/skills/design-game/`, а роли агентов переводит в `~/.codex/agents/*.toml`. Модели ролей задают флаги `--model` и `--strong-model`, без них роль берёт модель сессии. Обновление — тот же запуск с `--force`. Чтобы поставить только в один проект, добавь `--project <папка>`.
 
----
+**Claude Code без плагина** — `python install.py --claude`: скилл в `~/.claude/skills/`, роли в `~/.claude/agents/`.
 
-## Attribution
+Для веб-зондов нужен Playwright MCP, для зондов на движке — MCP этого движка. Бумажным и табличным зондам ничего не нужно. В Codex MCP подключают в `~/.codex/config.toml`, а ограничения ролей держатся на тексте ролей: поля `tools` там нет.
 
-Based on the methodology of Jesse Schell, *The Art of Game Design: A Book of Lenses* (3rd ed.). The focus questions for lenses in `lenses/lenses.md` are a paraphrase, not verbatim text from the card deck. If you want to work with the original cards, we recommend buying the deck from the author.
+### Попросить агента поставить
 
----
+Скопируй своему агенту одно сообщение.
 
-## License
+Claude Code:
 
-[MIT](LICENSE) — Copyright (c) 2026 Alexander Pronin.
+```text
+Установи скилл design-game: выполни в терминале
+claude plugin marketplace add Goryuchnick/schell-lens-deck
+claude plugin install design-game@schell-lens-deck
+и скажи мне перезапустить сессию.
+```
+
+Codex:
+
+```text
+Установи скилл design-game: склонируй https://github.com/Goryuchnick/schell-lens-deck во временную папку и запусти в ней python install.py --codex (на Windows — py install.py --codex). Проверь, что появились ~/.agents/skills/design-game/SKILL.md и ~/.codex/agents/gd-keeper.toml, и скажи мне перезапустить Codex.
+```
+
+## Как начать
+
+Скажи «спроектируем игру» и одну фразу об идее. В Codex скилл зовут `$design-game`, в Claude Code он включается по смыслу запроса.
+
+1. Скилл задаст вопросы брифа одним сообщением, у каждого — своя рекомендация: масштаб, теги игры, есть ли заказчик, режим работы, где хранить папку игры.
+2. Дальше стадия за стадией. После каждой ты получаешь карточку гейта: что решено, вердикт хранителя, самый крупный риск, вопросы к тебе с рекомендациями.
+3. Отвечать можно в чат по номеру вопроса («Q-02.3: да») или комментарием прямо в файле стадии:
+
+   ```markdown
+   > [!owner] 2026-11-20
+   > Стартовую комнату сделать темнее, а выход из неё — заметнее. Q-04.2: да.
+   ```
+
+Режим по умолчанию — `co-design`: решения принимаешь ты. В режиме `assisted` агент ведёт стадию сам до гейта, в `auto` — до конца, но всё, что уходит наружу от твоего имени, он только готовит, а отправляешь ты.
+
+Работу можно бросить и вернуться: «продолжим игру» в той же папке — скилл прочитает состояние из Библии и продолжит с незакрытой стадии.
+
+## Устройство репозитория
+
+```
+.claude-plugin/marketplace.json   маркетплейс плагинов Claude Code
+install.py                        установщик для Codex и Claude Code без плагина
+plugins/design-game/
+  agents/gd-*.md                  роли: хранитель, стадийные агенты, зонды, агент-игрок
+  skills/design-game/
+    SKILL.md                      оркестратор
+    WIKI.md                       куда смотреть в какой ситуации
+    lenses/lenses.json            колода
+    stages/                       шаги стадий и роли линз по стадиям
+    method/                       правила метода: цикл, канал владельца, статус знания, слои
+    templates/                    шаблоны файлов игры
+    scripts/                      скрипты пайплайна
+docs/                             спецификация, уроки, история версий
+```
+
+## Откуда линзы
+
+Метод и линзы — Джесси Шелла. Колода сверена с русским изданием «Геймдизайн. Как создать игру, в которую будут играть все» (Альпина Паблишер, 2019) — это перевод второго издания, линзы там называются «призмами». Номер и название из русского издания стоят у каждой линзы, чтобы её можно было найти в книге. Английские названия сверены с оглавлением третьего издания (CRC Press, 2019); нумерация 1–113 в нём та же, новая только 93½.
+
+Все тексты линз — пересказ своими словами, а не текст книги: вопросы передают мысль автора, но не его формулировки и не примеры. Колода не заменяет книгу. Если скилл пригодился, купи книгу: в ней объяснения, истории и примеры, которых здесь нет.
+
+## Лицензия
+
+[MIT](LICENSE).

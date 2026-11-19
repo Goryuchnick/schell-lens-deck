@@ -1,0 +1,14 @@
+{
+  "name": "schell-lens-deck",
+  "owner": {
+    "name": "Goryuchnick"
+  },
+  "description": "Пайплайн гейм-дизайна по линзам Джесси Шелла для Claude Code: скилл design-game и его роли.",
+  "plugins": [
+    {
+      "name": "design-game",
+      "source": "./plugins/design-game",
+      "description": "Гейм-дизайн по линзам Джесси Шелла: от управляющей идеи до релиза по стадиям 0–7, скрипты подбора линз и проверки стадий, хранитель связности, агент-игрок."
+    }
+  ]
+}
